@@ -1,5 +1,7 @@
 __author__ = 'zdenek'
 
+import queue
+import math
 
 class Node:
     def __init__(self):
@@ -28,11 +30,11 @@ class InOrderParser:
         halfIndex = startIndex + half
         node.value = array[halfIndex]
 
-        print(
-            'startIndex:', startIndex,
-            ', endIndex:', endIndex,
-            ', halfIndex:', halfIndex,
-            ', halfIndex value:', node.value)
+        # print(
+        #     'startIndex:', startIndex,
+        #     ', endIndex:', endIndex,
+        #     ', halfIndex:', halfIndex,
+        #     ', halfIndex value:', node.value)
 
         if startIndex < halfIndex:  # there is still some item on the left side of current value
             node.left = Node()
@@ -49,8 +51,36 @@ class BinaryTreePrinter:
 
     def printTree(self):
         treeHeight = self.findHeight(self.rootNode) - 1
+        q = queue.Queue()
+        q.put_nowait(self.rootNode)
 
+        self.printWithOffset(treeHeight ** 3, q, 1)
         print('treeHeight:', treeHeight)
+
+    def printWithOffset(self, offset, parentQueue, level):
+        offsetSpaces = math.floor(offset) * ' '
+
+        q = queue.Queue()
+
+        while parentQueue.qsize() > 0:
+            node = parentQueue.get_nowait()
+
+            value = 'X'
+
+            if node is not None:
+                value = node.value
+                q.put_nowait(node.left)
+                q.put_nowait(node.right)
+
+            print(offsetSpaces, value, end='')
+
+        print('')
+
+        if q.qsize() == 0:
+            return
+
+        level += 0.4
+        self.printWithOffset(1 * offset / (level), q, level)
 
     def findHeight(self, node):
 
@@ -63,7 +93,7 @@ class BinaryTreePrinter:
         if node.right is not None:
             rightHeight = self.findHeight(node.right)
 
-        if leftHeight > 0 and leftHeight > rightHeight:
+        if leftHeight > 0 and leftHeight >= rightHeight:
             return 1 + leftHeight
         elif rightHeight > 0 and rightHeight > leftHeight:
             return 1 + rightHeight
@@ -71,7 +101,7 @@ class BinaryTreePrinter:
             return 1
 
 
-inOrder = [1, 2, 3, 4, 5, 6, 7, 8]
+inOrder = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17]
 
 parser = InOrderParser(inOrder)
 rootNode = parser.parse()
